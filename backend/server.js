@@ -1,14 +1,13 @@
 const express = require("express");
 const dotenv = require("dotenv");
-// const connectToDatabase = require("./config/dbConnection");
+const connectToDatabase = require("./config/dbConnection");
 const User = require("./routes/userRoutes");
-const Topic = require("./routes/topicRoutes");
-const Question = require("./routes/questionRoutes");
-const Answer = require("./routes/answerRoutes");
+const Task = require("./routes/taskRoutes");
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 const syncModels = require("./config/syncModels");
+const cors = require("cors");
 
-dotenv.config();
+require("dotenv").config();
 
 //DB Work
 require("./config/dbConnection");
@@ -16,15 +15,24 @@ syncModels();
 
 const app = express();
 app.use(express.json()); // to Accept Json Data
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 
 app.get("/", (req, res) => {
   res.send("API is Running");
 });
 
-app.use("/api/topic", Topic);
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.originalUrl}`);
+  next();
+});
+
 app.use("/api/user", User);
-app.use("/api/question", Question);
-app.use("/api/answers", Answer);
+app.use("/api/task", Task);
 
 //If no routes exist it will fall on this
 app.use(notFound);
